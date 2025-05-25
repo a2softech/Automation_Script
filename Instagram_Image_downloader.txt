@@ -1,0 +1,57 @@
+(function autoScrollAndDownload() {
+    let scrollInterval;
+
+    // Set to track already downloaded image URLs
+    const downloadedImages = new Set();
+
+    // Function to download images
+    const downloadImages = () => {
+        // Collecting all images within the class 'x1n2onr6'
+        const postImages = document.querySelectorAll('.x1n2onr6 img');
+
+        // If no images are found
+        if (postImages.length === 0) {
+            console.log("😢 No images found. Scroll down to load more posts...");
+            return;
+        }
+
+        let downloadedCount = 0;
+
+        // Download only new, non-duplicate images
+        postImages.forEach((img, index) => {
+            const url = img.src;
+
+            // If the image is already downloaded, skip it
+            if (downloadedImages.has(url)) {
+                return;
+            }
+
+            // Mark this image as downloaded
+            downloadedImages.add(url);
+
+            fetch(url)
+                .then(res => res.blob())
+                .then(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `insta_post_${index + 1}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    downloadedCount++;
+                });
+        });
+
+        console.log(`✅ Downloaded ${downloadedCount} new images!`);
+
+        // Scroll down to load more posts
+        window.scrollBy(0, window.innerHeight);
+    };
+
+    // Start scrolling and downloading
+    scrollInterval = setInterval(() => {
+        downloadImages();
+        // Stop after scrolling down 5 times
+        if (window.scrollY > 5000) clearInterval(scrollInterval);
+    }, 3000);  // Runs every 3 seconds
+})();

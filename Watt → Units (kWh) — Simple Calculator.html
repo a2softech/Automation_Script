@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Watt → Units (kWh) — Simple Calculator</title>
+  <style>
+    :root{
+      --bg:#f6fbff;
+      --card:#ffffff;
+      --accent:#2563eb; /* blue */
+      --muted:#6b7280;
+      --soft:#eef2ff;
+      --glass: rgba(255,255,255,0.6);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; background: linear-gradient(180deg,var(--bg),#eef7ff 60%);
+      display:flex; align-items:center; justify-content:center; padding:28px;
+      color:#0f172a;
+    }
+    .card{
+      width:100%; max-width:920px; background:var(--card); border-radius:16px; box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+      padding:26px; display:grid; gap:18px;
+    }
+    header{display:flex; gap:16px; align-items:center}
+    .logo{
+      width:64px; height:64px; border-radius:12px; background:linear-gradient(135deg,var(--accent),#7c3aed); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:20px;
+      box-shadow: 0 6px 18px rgba(37,99,235,0.14);
+    }
+    h1{margin:0; font-size:20px}
+    p.lead{margin:0; color:var(--muted); font-size:13px}
+
+    .grid{
+      display:grid; grid-template-columns: 1fr 1fr; gap:16px;
+    }
+    label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+    input[type="number"], input[type="text"], select{
+      width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e6eefc; background:var(--soft); font-size:15px;
+      outline:none; transition:box-shadow .12s, transform .06s;
+    }
+    input[type="number"]:focus{ box-shadow:0 6px 18px rgba(37,99,235,0.12); transform:translateY(-1px) }
+
+    .result{
+      padding:18px; border-radius:12px; background: linear-gradient(180deg, #fff, #fbfdff);
+      border: 1px solid #eef3ff;
+    }
+    .big{font-size:22px; font-weight:700}
+    .muted{color:var(--muted); font-size:13px}
+
+    .row{display:flex; gap:12px}
+    .btn{cursor:pointer; padding:10px 14px; border-radius:10px; border:none; font-weight:600}
+    .btn-primary{background:var(--accent); color:white}
+    .btn-ghost{background:transparent; border:1px solid #e6eefc}
+
+    footer{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:6px}
+
+    .examples{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{background:#f1f5ff; padding:8px 10px; border-radius:999px; font-size:13px; cursor:pointer; border:1px solid #e7eeff}
+
+    /* print styles */
+    @media print{
+      body{background:white}
+      .btn, .chip{display:none}
+      .card{box-shadow:none; border-radius:0;}
+    }
+
+   @media (max-width:720px){
+  body{padding:16px; min-height: 0}
+  .card{padding:18px}
+  header{gap:10px; flex-direction:column; align-items:flex-start}
+  h1{font-size:18px}
+  p.lead{font-size:12px}
+  .grid{grid-template-columns:1fr}
+  .row{flex-wrap:wrap}
+  .btn{flex:1 1 auto; text-align:center}
+  footer{flex-direction:column; align-items:flex-start; gap:4px; font-size:12px}
+  body{min-height: auto !important}
+}
+
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <header>
+      <div class="logo">W→U</div>
+      <div>
+        <h1>Watt → Units (kWh) Calculator</h1>
+        <p class="lead">Bas watt daalo , or bs apni unit pta kro = <strong>1 hour</strong>. Result 1h / 10h / 24h / 30 days (₹10 per unit).</p>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div>
+        <label for="watt">Power (Watts)</label>
+        <input id="watt" type="number" min="0" step="any" placeholder="e.g. 100" value="100">
+
+        <div style="height:12px"></div>
+
+        <label for="rate">Electricity rate (per unit) — <span style="font-weight:700">₹10</span></label>
+        <input id="rate" type="number" min="0" step="any" placeholder="e.g. 10 (₹ per unit)" value="10" readonly>
+
+        <div style="height:14px"></div>
+
+        <div class="row">
+          <button id="calc" class="btn btn-primary">Calculate</button>
+          <button id="reset" class="btn btn-ghost">Reset</button>
+        <!--   <button id="download" class="btn" title="Download HTML">Download HTML</button>
+          <button id="pdf" class="btn">Download PDF</button> -->
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="muted">Quick examples:</div>
+        <div class="examples" style="margin-top:8px">
+          <div class="chip" data-w="9">💡 Bulb 9W</div>
+          <div class="chip" data-w="12">💡 Bulb 12W</div>
+          <div class="chip" data-w="20">💡 Bulb 20W</div>
+
+          <div class="chip" data-w="10">🔌 Charger 10W</div>
+          <div class="chip" data-w="18">🔌 Charger 18W</div>
+          <div class="chip" data-w="33">🔌 Charger 33W</div>
+          <div class="chip" data-w="65">🔌 Charger 65W</div>
+
+          <div class="chip" data-w="200">🧊 Fridge 200W</div>
+          <div class="chip" data-w="75">🌀 Fan 75W</div>
+          <div class="chip" data-w="220">❄️ Cooler 220W</div>
+          <div class="chip" data-w="250">🚿 Water Heater 220W</div>
+          <div class="chip" data-w="1000">🚿 Water Heater 1000W</div>
+        </div>
+      </div>
+
+      <div class="result">
+        <div style="display: none;">
+          <div class="muted">Results (default time = 1 hour)</div>
+          <div class="big" id="unitsOut">0 units</div>
+          <div class="muted" id="costOut">—</div>
+        </div>
+
+        <hr style="border:none; height:1px; background:#f1f8ff; margin:12px 0" />
+
+        <div>
+          <div class="muted">Detailed Cost Breakdown (₹10 per unit)</div>
+          <div id="breakdown" style="margin-top:8px; font-size:14px; line-height:1.6"></div>
+        </div>
+
+      </div>
+    </section>
+
+  
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const watt = $('watt');
+    const rate = $('rate');
+    const calc = $('calc');
+    const reset = $('reset');
+    const download = $('download');
+    const pdfBtn = $('pdf');
+
+    const unitsOut = $('unitsOut');
+    const costOut = $('costOut');
+    const breakdown = $('breakdown');
+
+    function format(n){
+      if (Number.isFinite(n)) return (+n.toFixed(3)).toString();
+      return '—';
+    }
+
+    function calculate(){
+      const w = parseFloat(watt.value) || 0;
+      const r = parseFloat(rate.value) || 10;
+      const hDefault = 1; // default 1 hour
+
+      const kW = w / 1000;
+      // units for default 1 hour
+      const units1 = kW * hDefault;
+
+      unitsOut.textContent = format(units1) + ' units (for 1 hour)';
+
+      if (r > 0){
+        const cost1 = units1 * r;
+        costOut.textContent = 'Estimated cost (1h): ₹' + format(cost1);
+      } else {
+        costOut.textContent = 'Estimated cost: —';
+      }
+
+      // Breakdown for multiple durations
+      let breakdownHTML = '';
+      const scenarios = [
+        {label: '1 hour', hrs: 1},
+        {label: '10 hours', hrs: 10},
+        {label: '24 hours', hrs: 24},
+        {label: '1 month (30 days)', hrs: 24*30}
+      ];
+
+      scenarios.forEach(s => {
+        const u = kW * s.hrs;
+        const c = u * r;
+        breakdownHTML += `<div>⏱️ ${s.label}: <strong>${format(u)} units</strong> → ₹${format(c)}</div>`;
+      });
+
+      breakdown.innerHTML = breakdownHTML;
+    }
+
+    // initial calc
+    calculate();
+
+    calc.addEventListener('click', e => { e.preventDefault(); calculate(); });
+    watt.addEventListener('input', calculate);
+    rate.addEventListener('input', calculate);
+
+    reset.addEventListener('click', e => {
+      e.preventDefault();
+      watt.value = '100'; rate.value = '10';
+      calculate();
+    });
+
+    document.querySelectorAll('.chip').forEach(ch => {
+      ch.addEventListener('click', () => {
+        watt.value = ch.getAttribute('data-w');
+        calculate();
+      })
+    });
+
+    download.addEventListener('click', () => {
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'watt_to_unit_calculator.html';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    pdfBtn.addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>

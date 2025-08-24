@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beautiful Age Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0px 6px 18px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 350px;
+    }
+    h2 {
+      color: #444;
+      margin-bottom: 20px;
+    }
+    .dob-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    select {
+      width: 30%;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #66a6ff;
+      border-radius: 10px;
+      background: #f0f8ff;
+      text-align: center;
+      cursor: pointer;
+    }
+    button {
+      background: #66a6ff;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #558de8;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎂 Age Calculator 🎂</h2>
+    <div class="dob-container">
+      <select id="day"></select>
+      <select id="month"></select>
+      <select id="year"></select>
+    </div>
+    <button onclick="calculateAge()">Calculate Age</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    // Fill Day
+    const daySelect = document.getElementById("day");
+    for (let d = 1; d <= 31; d++) {
+      daySelect.innerHTML += `<option value="${d}">${d}</option>`;
+    }
+
+    // Fill Month
+    const monthSelect = document.getElementById("month");
+    for (let m = 1; m <= 12; m++) {
+      monthSelect.innerHTML += `<option value="${m}">${m}</option>`;
+    }
+
+    // Fill Year
+    const yearSelect = document.getElementById("year");
+    let currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= 1900; y--) {
+      yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+
+    function calculateAge() {
+      let d = parseInt(daySelect.value);
+      let m = parseInt(monthSelect.value) - 1; // JS months 0-11
+      let y = parseInt(yearSelect.value);
+
+      let dob = new Date(y, m, d);
+      let today = new Date();
+
+      let years = today.getFullYear() - dob.getFullYear();
+      let months = today.getMonth() - dob.getMonth();
+      let days = today.getDate() - dob.getDate();
+
+      if (days < 0) {
+        months--;
+        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      document.getElementById("result").innerHTML =
+        `🎉 You are <b>${years}</b> years, <b>${months}</b> months, and <b>${days}</b> days old.`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FD Monthly Income Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #84fab0, #8fd3f4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0px 6px 18px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 360px;
+    }
+    h2 { color: #444; margin-bottom: 20px; }
+    .input-group { margin-bottom: 15px; text-align: left; }
+    label { font-size: 14px; color: #333; font-weight: 500; }
+    select, input { width: 100%; padding: 10px; font-size: 16px; border: 2px solid #8fd3f4; border-radius: 10px; margin-top: 5px; background: #f0f8ff; }
+    .time-selects { display: flex; gap: 5px; }
+    .time-selects select { flex: 1; }
+    .result { margin-top: 20px; font-size: 16px; color: #333; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🏦 FD Monthly Income Calculator</h2>
+
+    <div class="input-group">
+      <label>Deposit Amount (₹)</label>
+      <input type="number" id="amount" value="10000">
+    </div>
+
+    <div class="input-group">
+      <label>Rate of Interest (%)</label>
+      <input type="number" id="rate" value="6.5" step="0.01">
+    </div>
+
+    <div class="input-group">
+      <label>Time Period</label>
+      <div class="time-selects">
+        <select id="years">
+          <script>
+            for(let i=0;i<=30;i++){
+              document.write(`<option value="${i}" ${i===1?'selected':''}>${i} Y</option>`);
+            }
+          </script>
+        </select>
+        <select id="months">
+          <script>
+            for(let i=0;i<=11;i++){
+              document.write(`<option value="${i}" ${i===0?'selected':''}>${i} M</option>`);
+            }
+          </script>
+        </select>
+        <select id="days">
+          <script>
+            for(let i=0;i<=30;i++){
+              document.write(`<option value="${i}" ${i===0?'selected':''}>${i} D</option>`);
+            }
+          </script>
+        </select>
+      </div>
+    </div>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculateFD() {
+      let P = parseFloat(document.getElementById("amount").value) || 0;
+      let R = parseFloat(document.getElementById("rate").value) || 0;
+      let years = parseInt(document.getElementById("years").value) || 0;
+      let months = parseInt(document.getElementById("months").value) || 0;
+      let days = parseInt(document.getElementById("days").value) || 0;
+
+      // Total months including fractional months from days
+      let totalMonths = years*12 + months + (days/30);
+
+      // Monthly interest for normal months
+      let monthlyInterest = P * (R/100) / 12;
+
+      // Final month interest with 0.04% less rate
+      let finalMonthRate = R - 0.04; // reduce 0.04%
+      let finalMonthInterest = P * (finalMonthRate/100) / 12;
+
+      // Total interest = (all months except final) + final month
+      let totalInterest = monthlyInterest * (totalMonths - 1) + finalMonthInterest;
+
+      // Maturity amount
+      let maturity = P + totalInterest;
+
+      document.getElementById("result").innerHTML =
+        `💰 Maturity Amount: <b>₹${maturity.toFixed(2)}</b><br>` +
+        `📈 Earned Interest: <b>₹${totalInterest.toFixed(2)}</b><br>` +
+        `🗓️ Monthly Interest: <b>₹${monthlyInterest.toFixed(2)}</b><br>` +
+        `🔹 Final Month Interest (0.04% less): <b>₹${finalMonthInterest.toFixed(2)}</b>`;
+    }
+
+    document.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("input", calculateFD);
+      el.addEventListener("change", calculateFD);
+    });
+
+    window.onload = calculateFD;
+  </script>
+</body>
+</html>

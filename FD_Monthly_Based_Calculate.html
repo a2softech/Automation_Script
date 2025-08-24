@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FD Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f4f8;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px 0;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>FD Calculator</h2>
+
+  <label>Deposit Amount (₹):</label><br>
+  <input type="number" id="principal" value="10000"><br>
+
+  <label>Annual Interest Rate (%):</label><br>
+  <input type="number" id="rate" value="3.5"><br>
+
+  <label>Time Period (Months):</label><br>
+  <input type="number" id="months" value="12"><br>
+
+  <button onclick="calculateFD()">Calculate</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculateFD() {
+      let P = parseFloat(document.getElementById('principal').value);
+      let R = parseFloat(document.getElementById('rate').value);
+      let N = parseInt(document.getElementById('months').value);
+
+      // Monthly interest rate
+      let monthlyRate = R / 12 / 100;
+
+      // Total maturity amount (simple interest method)
+      let maturity = P * (1 + monthlyRate * N);
+
+      // Total interest earned
+      let interest = maturity - P;
+
+      // Monthly interest
+      let monthlyInterest = interest / N;
+
+      document.getElementById('result').innerHTML =
+        `Maturity Amount: ₹${maturity.toFixed(2)}<br>` +
+        `Total Interest Earned: ₹${interest.toFixed(2)}<br>` +
+        `Monthly Interest: ₹${monthlyInterest.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>

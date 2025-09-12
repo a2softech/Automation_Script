@@ -1,50 +1,71 @@
 let currentPage = 1;
-let consecutiveErrors = 0;
-const maxErrors = 15;
+let criticalErrors = 0;
+const maxCriticalErrors = 10;
 const minDelay = 3000;
-const maxDelay = 5000;
+const maxDelay = 6000;
 const maxNextRetries = 5;
 let nextRetries = 0;
+let scrollAttempts = 0;
 
-// Utility for random delay
+// Random delay to mimic human behavior
 function randomDelay() {
   return Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
 }
 
-// Start process
-function startConnectionProcess() {
-  const connectButtons = Array.from(document.querySelectorAll('button'))
-    .filter(btn =>
-      btn.innerText.trim().toLowerCase() === 'connect' &&
-      !btn.disabled &&
-      btn.offsetParent !== null
-    );
+// Check if element is visible
+function isVisible(el) {
+  const rect = el.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
 
-  if (connectButtons.length > 0) {
-    console.log(`🔍 Found ${connectButtons.length} connect buttons on Page ${currentPage}`);
-    clickConnectButtonsSequentially(connectButtons);
-  } else {
-    console.warn(`⚠️ No connect buttons found on Page ${currentPage}`);
-    consecutiveErrors++;
-    checkErrorLimit();
-    goToNextPage();
-  }
+// Smooth auto-scroll to load more profiles
+function autoScroll(callback) {
+  const scrollHeight = document.body.scrollHeight;
+  window.scrollTo({ top: scrollHeight, behavior: 'smooth' });
+  scrollAttempts++;
+  console.log(`📜 Scroll attempt ${scrollAttempts}`);
+  setTimeout(() => {
+    if (scrollAttempts < 3) {
+      autoScroll(callback);
+    } else {
+      scrollAttempts = 0;
+      callback();
+    }
+  }, 2000);
+}
+
+// Start the connection process
+function startConnectionProcess() {
+  autoScroll(() => {
+    const connectButtons = Array.from(document.querySelectorAll('button'))
+      .filter(btn =>
+        btn.innerText.trim().toLowerCase().includes('connect') &&
+        !btn.disabled &&
+        isVisible(btn)
+      );
+
+    if (connectButtons.length > 0) {
+      console.log(`🔍 Found ${connectButtons.length} connect buttons on Page ${currentPage}`);
+      clickConnectButtonsSequentially(connectButtons);
+    } else {
+      console.warn(`⚠️ No connect buttons found on Page ${currentPage}`);
+      goToNextPage();
+    }
+  });
 }
 
 // Click connect buttons one-by-one
 function clickConnectButtonsSequentially(buttons, index = 0) {
   if (index >= buttons.length) {
-    console.log("✅ All connect buttons on current page processed.");
+    console.log("✅ All connect buttons processed.");
     goToNextPage();
     return;
   }
 
   const connectBtn = buttons[index];
 
-  if (!connectBtn || connectBtn.disabled || connectBtn.offsetParent === null) {
-    console.warn(`⚠️ Connect button #${index + 1} is not valid. Skipping...`);
-    consecutiveErrors++;
-    checkErrorLimit();
+  if (!connectBtn || connectBtn.disabled || !isVisible(connectBtn)) {
+    console.log(`⏭️ Skipping button #${index + 1} — not usable`);
     setTimeout(() => clickConnectButtonsSequentially(buttons, index + 1), randomDelay());
     return;
   }
@@ -54,70 +75,84 @@ function clickConnectButtonsSequentially(buttons, index = 0) {
     connectBtn.click();
 
     setTimeout(() => {
-      waitForSendButtonAndClick(index, 0, buttons);
+      handleModalOrDirectConnect(index, 0, buttons);
     }, randomDelay());
 
   } catch (error) {
-    console.error(`❌ Error clicking connect #${index + 1}:`, error);
-    consecutiveErrors++;
-    checkErrorLimit();
+    console.error(`❌ Critical error clicking connect #${index + 1}:`, error);
+    criticalErrors++;
+    checkCriticalErrorLimit();
     setTimeout(() => clickConnectButtonsSequentially(buttons, index + 1), randomDelay());
   }
 }
 
-// Wait for 'Send without a note' and click
-function waitForSendButtonAndClick(index, attempt = 0, buttons) {
-  const sendButton = Array.from(document.querySelectorAll('button'))
-    .find(btn => btn.innerText.trim().toLowerCase() === 'send without a note');
+// Handle modal or direct connect
+function handleModalOrDirectConnect(index, attempt = 0, buttons) {
+  const modal = document.querySelector('.artdeco-modal');
+  const sendButton = modal
+    ? Array.from(modal.querySelectorAll('button')).find(btn =>
+        btn.innerText.trim().toLowerCase().includes('send') &&
+        !btn.disabled &&
+        isVisible(btn)
+      )
+    : null;
 
-  if (sendButton && !sendButton.disabled && sendButton.offsetParent !== null) {
-    console.log(`📤 Clicking 'Send without a note' for #${index + 1}`);
+  if (sendButton) {
+    console.log(`📤 Clicking 'Send' for #${index + 1}`);
     sendButton.click();
-    consecutiveErrors = 0;
+    setTimeout(() => clickConnectButtonsSequentially(buttons, index + 1), randomDelay());
+  } else if (!modal) {
+    console.log(`✅ No modal — assuming direct connect for #${index + 1}`);
     setTimeout(() => clickConnectButtonsSequentially(buttons, index + 1), randomDelay());
   } else if (attempt < 5) {
-    setTimeout(() => waitForSendButtonAndClick(index, attempt + 1, buttons), 500);
+    setTimeout(() => handleModalOrDirectConnect(index, attempt + 1, buttons), 700);
   } else {
-    console.warn(`❌ 'Send without a note' not found for #${index + 1} after retries`);
-    consecutiveErrors++;
-    checkErrorLimit();
+    console.warn(`⏭️ 'Send' button not found for #${index + 1} — skipping`);
     setTimeout(() => clickConnectButtonsSequentially(buttons, index + 1), randomDelay());
   }
 }
 
-// Go to next page — ✅ FIXED version
+// Go to next page
 function goToNextPage() {
   const nextButton = Array.from(document.querySelectorAll('button, span, a'))
     .find(el =>
-      el.innerText.trim().toLowerCase() === 'next' &&
+      el.innerText.trim().toLowerCase().includes('next') &&
       !el.disabled &&
-      el.offsetParent !== null
+      isVisible(el)
     );
 
   if (nextButton) {
     currentPage++;
     nextRetries = 0;
-    console.log(`➡️ Navigating to Page ${currentPage}`);
+    console.log(`➡️ Moving to Page ${currentPage}`);
     nextButton.click();
-    setTimeout(() => startConnectionProcess(), randomDelay());
+    setTimeout(() => {
+      if (document.readyState === 'complete') {
+        startConnectionProcess();
+      } else {
+        setTimeout(startConnectionProcess, 2500);
+      }
+    }, randomDelay());
   } else if (nextRetries < maxNextRetries) {
-    console.warn(`🚫 'Next' button not found. Retrying... (${nextRetries + 1})`);
+    console.warn(`🔄 'Next' button not found. Retrying... (${nextRetries + 1})`);
     nextRetries++;
     setTimeout(goToNextPage, randomDelay());
   } else {
-    console.error("🛑 Reached max retries for next page. Stopping script.");
+    console.error("🛑 Max retries reached for next page. Stopping.");
+    alert("Script stopped: 'Next' button not found after multiple attempts.");
   }
 }
 
-// Check for too many errors
-function checkErrorLimit() {
-  if (consecutiveErrors >= maxErrors) {
-    console.error(`❌ ${consecutiveErrors} consecutive errors occurred. Terminating the script.`);
-    throw new Error("Script terminated due to multiple errors.");
+// Only count critical errors
+function checkCriticalErrorLimit() {
+  if (criticalErrors >= maxCriticalErrors) {
+    console.error(`❌ ${criticalErrors} critical errors occurred. Terminating.`);
+    alert("Script terminated due to repeated critical failures.");
+    throw new Error("Too many critical errors.");
   }
 }
 
-// 🚀 Run the script
+// 🚀 Launch the script
 try {
   startConnectionProcess();
 } catch (err) {

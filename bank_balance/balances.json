@@ -1,0 +1,77 @@
+{
+    "last_updated": "2025-10-06 22:00:06",
+    "accounts": [
+        {
+            "name": "ICICI Bank",
+            "balance": 17936
+        },
+        {
+            "name": "BOB Bank",
+            "balance": 4686
+        },
+        {
+            "name": "SBI Bank",
+            "balance": 0
+        },
+        {
+            "name": "SBM Bank",
+            "balance": 0
+        },
+        {
+            "name": "UBI Bank",
+            "balance": 91
+        },
+        {
+            "name": "Paytm Bank",
+            "balance": 0
+        },
+        {
+            "name": "PNB Bank",
+            "balance": -188
+        },
+        {
+            "name": "PSB Bank",
+            "balance": 17
+        }
+    ],
+    "credit_cards": [
+        {
+            "card_name": "ICICI Coral Rupay",
+            "due_amount": -14109,
+            "due_date": "2025-10-15"
+        },
+        {
+            "card_name": "Amazon Pay",
+            "due_amount": 11448,
+            "due_date": "2025-10-22"
+        },
+        {
+            "card_name": "BOB Card",
+            "due_amount": 17041,
+            "due_date": ""
+        }
+    ],
+    "receivables": [],
+    "payables": [
+        {
+            "name": "Reraram mosaji",
+            "amount": 20000,
+            "note": "shadi ke liye liye the"
+        },
+        {
+            "name": "Durgesh malviya bhaiya",
+            "amount": 20000,
+            "note": "shadi ke liye liye the"
+        },
+        {
+            "name": "sheru chacha",
+            "amount": 15800,
+            "note": "note and bill ke liye "
+        },
+        {
+            "name": "chintu mama",
+            "amount": 3800,
+            "note": "shari ke"
+        }
+    ]
+}
